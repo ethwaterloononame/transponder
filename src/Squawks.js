@@ -3,6 +3,8 @@ import { connect } from 'react-redux';
 import {List, ListItem} from 'material-ui/List';
 import Avatar from 'material-ui/Avatar';
 import Blockies from 'ethereum-blockies';
+import Divider from 'material-ui/Divider';
+import Paper from 'material-ui/Paper';
 
 class Squawks extends Component {
   componentWillReceiveProps(nextProps) {
@@ -27,19 +29,25 @@ class Squawks extends Component {
 
   render() {
     return (
-      <List>
-        { this.props.squawks.log.map((squawk, index) => {
-          
-          const icon = this.createAvatar(squawk.args._author);
+      <Paper zDepth={1} style={{ margin: '1em' }}>
+        <List>
+          { this.props.squawks.log.map((squawk, index) => {
+            
+            const icon = this.createAvatar(squawk.args._author);
 
-          return <ListItem
-            key={index}
-            leftAvatar={ <Avatar src={icon.toDataURL()} /> }
-            primaryText={squawk.args._author}
-            secondaryText={squawk.args._text}
-          />
-        }) }
-      </List>
+            return <section key={index}>
+              { index === 0 ? '' : <Divider /> }
+              <ListItem
+                leftAvatar={ <Avatar src={icon.toDataURL()} /> }
+                primaryText={squawk.args._text}
+                secondaryText={
+                  <p>{squawk.args._author} | {squawk.blockNumber}</p>
+                }
+              />
+            </section>
+          }) }
+        </List>
+      </Paper>
     )
   } 
 }

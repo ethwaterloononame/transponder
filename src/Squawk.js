@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux'
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
+import Paper from 'material-ui/Paper';
+import Snackbar from 'material-ui/Snackbar';
 
 class Squawk extends Component {
   constructor(props) {
@@ -9,20 +11,24 @@ class Squawk extends Component {
 
     this.state = {
       value: '',
-      submitted: false
+      submitted: false,
+      showNotice: false,
+      tooLong: false
     }
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleRequestClose = this.handleRequestClose.bind(this);
   }
 
   handleChange(event) {
-    this.setState({value: event.target.value});
+    const tooLong = event.target.value.length > 70;
+    this.setState({value: event.target.value, tooLong});
   }
 
   handleSubmit(event) {
     event.preventDefault();
-    if (this.state.submitted) return;
+    if (this.state.submitted || this.state.tooLong) return;
 
     this.setState({submitted: true});
 
@@ -43,24 +49,37 @@ class Squawk extends Component {
         transponder = instance;
         return transponder.squawk(this.state.value, { from: account });
       }).then(() => {
-        this.setState({submitted: false, value: ''});
+        this.setState({submitted: false, value: '', showNotice: true});
         console.log("Transaction complete!");
       })
 
     });
+  }
 
+  handleRequestClose(event) {
+    this.setState({ showNotice: false });
   }
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
-        <TextField
-					value={this.state.value}
-					onChange={this.handleChange}
-					placeholder="Choose your words carefully"
-				/>      
-        <RaisedButton type="submit" label="Squawk" />
-      </form>
+      <Paper zDepth={1} style={{ margin: '1em', padding: '1em' }}>
+        <form onSubmit={this.handleSubmit}>
+          <TextField
+            value={this.state.value}
+            onChange={this.handleChange}
+            placeholder="Speak your mind"
+            errorText={ this.state.tooLong ? "Too long!" : false }
+            fullWidth={true}
+          />      
+          <RaisedButton type="submit" label="Squawk 🐦" secondary={true} disabled={this.state.tooLong} fullWidth={true} />
+        </form>
+        <Snackbar
+          open={this.state.showNotice}
+          message="Squawk successful"
+          autoHideDuration={4000}
+          onRequestClose={this.handleRequestClose}
+        />
+      </Paper>
     )
   }
 };
